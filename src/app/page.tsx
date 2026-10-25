@@ -12,10 +12,17 @@ import { Footer } from "@/components/Footer";
 import { AlertCircle, Terminal, RefreshCw, Trophy, Layers } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 
+const MULTI_ROUND_CONTRACT_ADDRESS: `0x${string}` =
+  "0x48ef5c6348e349A9694579Fb1f2f8828f3a3f929";
+const OLD_V1_CONTRACT_ADDRESS =
+  "0xfe4998f06642223ad57e9cfa6609415c9d11e9e3";
+
 export default function Home() {
-  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as
-    | `0x${string}`
-    | undefined;
+  const envAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+  const contractAddress: `0x${string}` =
+    envAddress && envAddress.toLowerCase() !== OLD_V1_CONTRACT_ADDRESS
+      ? (envAddress as `0x${string}`)
+      : MULTI_ROUND_CONTRACT_ADDRESS;
 
   const { address } = useAccount();
   const [isRefreshing, setIsRefreshing] = useState(false);
