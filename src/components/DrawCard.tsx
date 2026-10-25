@@ -3,23 +3,27 @@
 import { useAccount, useConnect, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { botchainTestnet } from "@/lib/chain";
 import { prizePopAbi } from "@/lib/abi";
-import { Sparkles, Users, CheckCircle2, Loader2, AlertCircle, ArrowRight, ExternalLink } from "lucide-react";
+import { Sparkles, Users, CheckCircle2, Loader2, AlertCircle, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { WalletModal } from "./WalletModal";
 
 interface DrawCardProps {
   contractAddress: `0x${string}` | undefined;
+  currentDrawId: number;
   drawStatus: number | undefined; // 0: Open, 1: Closed, 2: Completed
   participantCount: number;
   hasUserEntered: boolean;
+  isOwner?: boolean;
   onRefresh: () => void;
 }
 
 export function DrawCard({
   contractAddress,
+  currentDrawId,
   drawStatus,
   participantCount,
   hasUserEntered,
+  isOwner,
   onRefresh,
 }: DrawCardProps) {
   const { address, isConnected } = useAccount();
@@ -61,18 +65,28 @@ export function DrawCard({
   // Handle errors
   useEffect(() => {
     if (writeError) {
-      const msg = writeError.message.includes("User rejected")
-        ? "Transaction rejected by user."
-        : writeError.message.includes("Already entered")
-        ? "You have already entered this draw."
-        : writeError.message.slice(0, 120);
+      let msg = writeError.message;
+      if (msg.includes("User rejected") || msg.includes("user rejected")) {
+        msg = "Transaction rejected in wallet.";
+      } else if (msg.includes("Already entered")) {
+        msg = `You have already entered Draw #${currentDrawId}.`;
+      } else if (
+        msg.includes("0x2a5") ||
+        msg.toLowerCase().includes("insufficient funds") ||
+        msg.toLowerCase().includes("exceed")
+      ) {
+        msg =
+          "Insufficient BOT balance in active wallet for gas fees. Please switch to an account with testnet BOT or get testnet BOT from the faucet.";
+      } else if (msg.length > 160) {
+        msg = msg.slice(0, 160) + "...";
+      }
       setErrorMessage(msg);
     } else if (receiptError) {
-      setErrorMessage(receiptError.message.slice(0, 120));
+      setErrorMessage(receiptError.message.slice(0, 140));
     } else {
       setErrorMessage(null);
     }
-  }, [writeError, receiptError]);
+  }, [writeError, receiptError, currentDrawId]);
 
   // Refresh data on confirmed transaction
   useEffect(() => {
@@ -106,7 +120,7 @@ export function DrawCard({
       return (
         <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/30">
           <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
-          Draw Open
+          Round #{currentDrawId} Open
         </span>
       );
     }
@@ -114,14 +128,14 @@ export function DrawCard({
       return (
         <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-error/15 text-error border border-error/30">
           <span className="w-2 h-2 rounded-full bg-error"></span>
-          Draw Closed
+          Round #{currentDrawId} Closed
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30">
         <CheckCircle2 className="w-3.5 h-3.5" />
-        Draw Completed
+        Round #{currentDrawId} Completed
       </span>
     );
   };
@@ -134,21 +148,21 @@ export function DrawCard({
 
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-wrap items-center gap-3 mb-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-mainText tracking-tight">
-              PrizePop #1
+              PrizePop #{currentDrawId || 1}
             </h2>
             {getStatusBadge()}
           </div>
           <p className="text-sm text-mutedText max-w-xl">
-            Free entry on Botchain Testnet. Simply submit an on-chain transaction to register your wallet in the draw.
+            Free entry on Botchain Testnet. Enter Draw #{currentDrawId} with a single on-chain transaction. Past participants are eligible to enter every new round!
           </p>
 
-          <div className="mt-5 flex items-center gap-6">
+          <div className="mt-5 flex flex-wrap items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2.5 bg-background/80 px-4 py-2.5 rounded-xl border border-border">
               <Users className="w-5 h-5 text-secondary" />
               <div>
-                <div className="text-xs text-mutedText font-medium">Registered Participants</div>
+                <div className="text-xs text-mutedText font-medium">Round #{currentDrawId} Entrants</div>
                 <div className="text-xl font-bold text-mainText">{participantCount}</div>
               </div>
             </div>
@@ -184,14 +198,26 @@ export function DrawCard({
           ) : hasUserEntered ? (
             <div className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-success/20 text-success border border-success/40 font-bold flex items-center justify-center gap-2 shadow-sm">
               <CheckCircle2 className="w-5 h-5" />
-              <span>You&apos;re In!</span>
+              <span>You&apos;re In Draw #{currentDrawId}!</span>
             </div>
-          ) : isDrawClosed || isDrawCompleted ? (
+          ) : isDrawCompleted ? (
+            <div className="flex flex-col items-center sm:items-end gap-1.5 w-full sm:w-auto">
+              <div className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-primary/15 text-primary border border-primary/30 font-semibold flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                <span>Draw #{currentDrawId} Completed</span>
+              </div>
+              {isOwner && (
+                <span className="text-[11px] text-mutedText">
+                  Owner can start Draw #{currentDrawId + 1} below
+                </span>
+              )}
+            </div>
+          ) : isDrawClosed ? (
             <button
               disabled
               className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-border/60 text-mutedText font-semibold flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
             >
-              <span>Draw Closed for Entries</span>
+              <span>Draw #{currentDrawId} Closed</span>
             </button>
           ) : (
             <button
@@ -212,7 +238,7 @@ export function DrawCard({
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  <span>Enter Draw</span>
+                  <span>Enter Draw #{currentDrawId}</span>
                 </>
               )}
             </button>

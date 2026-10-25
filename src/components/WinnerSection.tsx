@@ -1,18 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trophy, Copy, Check, ExternalLink, AlertTriangle, Sparkles } from "lucide-react";
+import { Trophy, Copy, Check, ExternalLink, AlertTriangle, Sparkles, Award } from "lucide-react";
 import { botchainTestnet } from "@/lib/chain";
 
 interface WinnerSectionProps {
+  currentDrawId: number;
   winner: `0x${string}` | string | undefined;
   isFinalized: boolean;
+  drawStatus: number | undefined;
+  participantCount: number;
+  mostRecentWinner?: `0x${string}` | string;
+  mostRecentDrawId?: number;
   currentUserAddress?: `0x${string}` | string;
 }
 
 export function WinnerSection({
+  currentDrawId,
   winner,
   isFinalized,
+  drawStatus,
+  participantCount,
+  mostRecentWinner,
+  mostRecentDrawId,
   currentUserAddress,
 }: WinnerSectionProps) {
   const [copied, setCopied] = useState(false);
@@ -22,24 +32,38 @@ export function WinnerSection({
     setIsMounted(true);
   }, []);
 
-  const hasWinner =
+  const hasCurrentWinner =
     isFinalized &&
     winner &&
     winner !== "0x0000000000000000000000000000000000000000";
 
-  const isUserWinner =
-    Boolean(isMounted &&
-    hasWinner &&
-    currentUserAddress &&
-    winner.toLowerCase() === currentUserAddress.toLowerCase());
+  const hasPreviousWinner =
+    Boolean(!hasCurrentWinner &&
+    mostRecentWinner &&
+    mostRecentWinner !== "0x0000000000000000000000000000000000000000");
 
-  const shortenAddress = (addr: string) => {
-    return `${addr.substring(0, 8)}...${addr.substring(addr.length - 6)}`;
-  };
+  const displayedWinner = hasCurrentWinner
+    ? winner
+    : hasPreviousWinner
+    ? mostRecentWinner
+    : undefined;
+
+  const displayedDrawId = hasCurrentWinner
+    ? currentDrawId
+    : hasPreviousWinner
+    ? mostRecentDrawId
+    : undefined;
+
+  const isUserWinner = Boolean(
+    isMounted &&
+    displayedWinner &&
+    currentUserAddress &&
+    displayedWinner.toLowerCase() === currentUserAddress.toLowerCase()
+  );
 
   const handleCopy = () => {
-    if (!winner) return;
-    navigator.clipboard.writeText(winner);
+    if (!displayedWinner) return;
+    navigator.clipboard.writeText(displayedWinner);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -53,28 +77,46 @@ export function WinnerSection({
               <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-mainText">Draw Winner</h3>
-              <p className="text-xs text-mutedText">Official outcome</p>
+              <h3 className="text-lg font-bold text-mainText">
+                {hasCurrentWinner
+                  ? `Draw #${currentDrawId} Winner`
+                  : hasPreviousWinner
+                  ? `Most Recent Winner (Draw #${displayedDrawId})`
+                  : `Draw #${currentDrawId} Winner`}
+              </h3>
+              <p className="text-xs text-mutedText">
+                {hasCurrentWinner
+                  ? "Finalized on-chain result"
+                  : hasPreviousWinner
+                  ? `Latest crowned winner from Draw #${displayedDrawId}`
+                  : `Awaiting draw finalization`}
+              </p>
             </div>
           </div>
-          {hasWinner && (
+
+          {hasCurrentWinner ? (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Finalized
+              Draw #{currentDrawId} Winner
             </span>
-          )}
+          ) : hasPreviousWinner ? (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary/20 text-secondary border border-secondary/30 flex items-center gap-1">
+              <Award className="w-3 h-3" />
+              Recent (Draw #{displayedDrawId})
+            </span>
+          ) : null}
         </div>
 
-        {!hasWinner ? (
+        {!displayedWinner ? (
           <div className="py-10 px-4 text-center flex flex-col items-center justify-center">
             <div className="w-12 h-12 rounded-full bg-border/40 flex items-center justify-center text-mutedText mb-3">
               <Trophy className="w-6 h-6 opacity-60" />
             </div>
             <h4 className="text-base font-semibold text-mainText mb-1">
-              No winner selected yet.
+              No winner selected yet for Draw #{currentDrawId}
             </h4>
             <p className="text-xs text-mutedText max-w-sm">
-              The winner will be selected and recorded on-chain once the draw is closed by the owner.
+              The winner will be randomly selected on-chain once Draw #{currentDrawId} is closed by the owner.
             </p>
           </div>
         ) : (
@@ -88,7 +130,11 @@ export function WinnerSection({
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold mb-3">
                 <Trophy className="w-3.5 h-3.5" />
-                <span>Winner Announced!</span>
+                <span>
+                  {hasCurrentWinner
+                    ? `Draw #${currentDrawId} Winner Announced!`
+                    : `Draw #${displayedDrawId} Champion`}
+                </span>
               </div>
 
               {isUserWinner && (
@@ -100,7 +146,7 @@ export function WinnerSection({
               )}
 
               <div className="font-mono text-sm sm:text-base font-bold text-mainText break-all my-2">
-                {winner}
+                {displayedWinner}
               </div>
 
               <div className="flex items-center justify-center gap-2 mt-4">
@@ -122,7 +168,7 @@ export function WinnerSection({
                 </button>
 
                 <a
-                  href={`${botchainTestnet.blockExplorers.default.url}/address/${winner}`}
+                  href={`${botchainTestnet.blockExplorers.default.url}/address/${displayedWinner}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors"
@@ -133,12 +179,28 @@ export function WinnerSection({
               </div>
             </div>
 
+            {/* Current draw status banner when displaying previous winner */}
+            {hasPreviousWinner && !hasCurrentWinner && (
+              <div className="p-3 rounded-xl bg-background border border-border/80 text-xs text-mutedText flex items-center justify-between">
+                <span>
+                  Draw #{currentDrawId} is currently{" "}
+                  <strong className="text-mainText">
+                    {drawStatus === 0 ? "Open for entries" : "Closed"}
+                  </strong>
+                  .
+                </span>
+                <span className="text-secondary font-medium">
+                  {participantCount} {participantCount === 1 ? "Entrant" : "Entrants"}
+                </span>
+              </div>
+            )}
+
             {/* Randomness disclaimer */}
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#282C36]/70 border border-border/80 text-[11px] text-mutedText leading-relaxed">
               <AlertTriangle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div>
                 <span className="font-semibold text-mainText">Demo Randomness Notice: </span>
-                This winner was selected using a demo-only on-chain pseudo-random mechanism for testnet illustration. It is not cryptographically verifiable or tamper-resistant.
+                This winner was selected using a demo-only on-chain pseudo-random mechanism for Botchain testnet illustration. It is not cryptographically verifiable or tamper-resistant.
               </div>
             </div>
           </div>

@@ -8,12 +8,14 @@ interface ParticipantListProps {
   participants: readonly `0x${string}`[] | string[];
   currentUserAddress?: `0x${string}` | string;
   isLoading: boolean;
+  currentDrawId?: number;
 }
 
 export function ParticipantList({
   participants,
   currentUserAddress,
   isLoading,
+  currentDrawId = 1,
 }: ParticipantListProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -42,9 +44,11 @@ export function ParticipantList({
             <Users className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-mainText">Participants</h3>
+            <h3 className="text-lg font-bold text-mainText">
+              Participants • Draw #{currentDrawId}
+            </h3>
             <p className="text-xs text-mutedText">
-              Real-time on-chain entrants
+              Real-time on-chain entrants for round #{currentDrawId}
             </p>
           </div>
         </div>
@@ -64,10 +68,10 @@ export function ParticipantList({
             <Users className="w-6 h-6 opacity-60" />
           </div>
           <h4 className="text-sm font-semibold text-mainText mb-1">
-            No participants yet
+            No participants yet for Draw #{currentDrawId}
           </h4>
           <p className="text-xs text-mutedText max-w-xs">
-            Connect your wallet and click &quot;Enter Draw&quot; above to become the first participant!
+            Connect your wallet and click &quot;Enter Draw #{currentDrawId}&quot; above to become the first participant!
           </p>
         </div>
       ) : (
