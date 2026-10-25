@@ -1,0 +1,29 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/PrizePop.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\n\n/**\n * @title PrizePop\n * @dev A simple, beginner-friendly Web3 prize draw contract deployed on Botchain Testnet.\n *\n * NOTE ON WINNER SELECTION:\n * This contract is designed as a portfolio showcase. The winner selection mechanism\n * implemented herein is purely for demonstration purposes and is NOT cryptographically secure.\n * It must NOT be used for real-money prizes, token distributions, or production drawings.\n * For production applications, integrate a verifiable randomness solution (e.g. Chainlink VRF).\n */\ncontract PrizePop {\n    enum DrawStatus {\n        Open,\n        Closed,\n        Completed\n    }\n\n    // Contract state\n    address public owner;\n    DrawStatus public drawStatus;\n    address[] public participants;\n    mapping(address => bool) public hasEntered;\n    address public winner;\n    bool public isFinalized;\n\n    // Events\n    event ParticipantEntered(address indexed participant);\n    event DrawClosed();\n    event WinnerSelected(address indexed winner);\n\n    modifier onlyOwner() {\n        require(msg.sender == owner, \"Only owner can call this\");\n        _;\n    }\n\n    constructor() {\n        owner = msg.sender;\n        drawStatus = DrawStatus.Open;\n        winner = address(0);\n        isFinalized = false;\n    }\n\n    /**\n     * @notice Enter the prize draw for free.\n     * Only callable while the draw is open. A wallet can only enter once.\n     */\n    function enterDraw() external {\n        require(drawStatus == DrawStatus.Open, \"Draw is not open\");\n        require(!hasEntered[msg.sender], \"Already entered\");\n\n        hasEntered[msg.sender] = true;\n        participants.push(msg.sender);\n\n        emit ParticipantEntered(msg.sender);\n    }\n\n    /**\n     * @notice Close the draw so that no further participants can enter.\n     * Can only be called by the owner while the draw is currently open.\n     */\n    function closeDraw() external onlyOwner {\n        require(drawStatus == DrawStatus.Open, \"Draw is not open\");\n\n        drawStatus = DrawStatus.Closed;\n        emit DrawClosed();\n    }\n\n    /**\n     * @notice Finalize the winner from the registered participants.\n     * Can only be called by the owner after the draw has been closed.\n     * Requires at least one participant. Cannot be finalized twice.\n     */\n    function finalizeWinner() external onlyOwner {\n        require(drawStatus == DrawStatus.Closed, \"Draw must be closed before finalization\");\n        require(!isFinalized, \"Draw already finalized\");\n        require(participants.length > 0, \"No participants in the draw\");\n\n        uint256 winningIndex = _selectDemoWinnerIndex();\n        winner = participants[winningIndex];\n        isFinalized = true;\n        drawStatus = DrawStatus.Completed;\n\n        emit WinnerSelected(winner);\n    }\n\n    /**\n     * @dev DEMO ONLY: Predictable pseudo-random selection mechanism for testnet demonstration.\n     * WARNING: This is NOT cryptographically secure and must NEVER be used for real-value prizes.\n     * Kept isolated so it can be swapped for a verifiable randomness provider (e.g., Chainlink VRF) in the future.\n     */\n    function _selectDemoWinnerIndex() internal view returns (uint256) {\n        return uint256(keccak256(abi.encodePacked(block.prevrandao, block.timestamp, participants.length))) % participants.length;\n    }\n\n    // ==========================================\n    // View Functions\n    // ==========================================\n\n    /**\n     * @notice Returns the total count of participants.\n     */\n    function getParticipantCount() external view returns (uint256) {\n        return participants.length;\n    }\n\n    /**\n     * @notice Returns a participant's address by their index in the list.\n     */\n    function getParticipant(uint256 index) external view returns (address) {\n        require(index < participants.length, \"Index out of bounds\");\n        return participants[index];\n    }\n\n    /**\n     * @notice Returns all registered participants.\n     */\n    function getAllParticipants() external view returns (address[] memory) {\n        return participants;\n    }\n\n    /**\n     * @notice Returns whether a specific address has entered the draw.\n     */\n    function checkHasEntered(address user) external view returns (bool) {\n        return hasEntered[user];\n    }\n\n    /**\n     * @notice Returns current draw status.\n     * 0 = Open, 1 = Closed, 2 = Completed\n     */\n    function getDrawStatus() external view returns (DrawStatus) {\n        return drawStatus;\n    }\n\n    /**\n     * @notice Returns the selected winner address (address(0) if not finalized).\n     */\n    function getWinner() external view returns (address) {\n        return winner;\n    }\n\n    /**\n     * @notice Returns whether the draw has been finalized.\n     */\n    function isDrawFinalized() external view returns (bool) {\n        return isFinalized;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "paris",
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}
