@@ -1,16 +1,29 @@
+require("dotenv").config({ path: ".env.local" });
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const contractAddress = "0xFe4998f06642223ad57E9cFA6609415C9d11e9e3";
-  const buildInfoPath = path.join(
-    __dirname,
-    "../artifacts/build-info/42062ba638eef82e3e6e62e5001d3992.json"
-  );
+  const contractAddress =
+    process.argv[2] || process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+
+  if (!contractAddress) {
+    console.error("Please provide a contract address as argument or NEXT_PUBLIC_CONTRACT_ADDRESS in .env.local");
+    process.exit(1);
+  }
+
+  // Find the build-info file
+  const buildInfoDir = path.join(__dirname, "../artifacts/build-info");
+  const files = fs.readdirSync(buildInfoDir).filter((f) => f.endsWith(".json"));
+  if (files.length === 0) {
+    throw new Error("No build-info file found. Please run npx hardhat compile first.");
+  }
+  const buildInfoPath = path.join(buildInfoDir, files[0]);
 
   const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, "utf8"));
   const standardJsonInput = JSON.stringify(buildInfo.input);
 
+  console.log("Target Contract:", contractAddress);
   console.log("Solc Long Version:", buildInfo.solcLongVersion);
 
   const params = new URLSearchParams({
@@ -23,10 +36,11 @@ async function main() {
     compilerversion: "v" + buildInfo.solcLongVersion,
   });
 
-  console.log("Submitting standard JSON input verification to Bohr scan...");
+  const apiEndpoint = process.env.BOTCHAIN_EXPLORER_API || "https://scan.botchain.ai/api";
+  console.log(`Submitting standard JSON input verification to ${apiEndpoint} ...`);
 
   try {
-    const res = await fetch("https://scan.bohr.life/api", {
+    const res = await fetch(apiEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -41,7 +55,7 @@ async function main() {
       console.log("Waiting 8s to check status...");
       await new Promise((r) => setTimeout(r, 8000));
       const statusRes = await fetch(
-        `https://scan.bohr.life/api?module=contract&action=checkverifystatus&guid=${data.result}`
+        `${apiEndpoint}?module=contract&action=checkverifystatus&guid=${data.result}`
       );
       const statusData = await statusRes.json();
       console.log("Verification status:", statusData);

@@ -126,7 +126,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
                 No Web3 Wallet Detected
               </h4>
               <p className="text-xs text-mutedText mb-4 max-w-xs mx-auto leading-relaxed">
-                You need a browser wallet like MetaMask or Rabby to interact with Botchain Testnet.
+                You need a browser wallet like MetaMask or Rabby to interact with Botchain Mainnet.
               </p>
               <a
                 href="https://metamask.io/download/"
@@ -144,7 +144,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
         {/* Footer info */}
         <div className="mt-5 pt-4 border-t border-border text-center">
           <p className="text-[11px] text-mutedText">
-            Connecting to Botchain Testnet (Chain ID 968)
+            Connecting to Botchain Mainnet (Chain ID 677)
           </p>
         </div>
       </div>

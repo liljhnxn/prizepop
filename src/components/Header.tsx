@@ -1,8 +1,8 @@
 "use client";
 
 import { useAccount, useDisconnect, useChainId, useSwitchChain } from "wagmi";
-import { botchainTestnet } from "@/lib/chain";
-import { Ticket, Wallet, AlertTriangle, LogOut, CheckCircle2 } from "lucide-react";
+import { botchain } from "@/lib/chain";
+import { Ticket, Wallet, AlertTriangle, LogOut, CheckCircle2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { WalletModal } from "./WalletModal";
 
@@ -19,7 +19,7 @@ export function Header() {
     setIsMounted(true);
   }, []);
 
-  const isWrongNetwork = isConnected && chainId !== botchainTestnet.id;
+  const isWrongNetwork = isConnected && chainId !== botchain.id;
 
   const shortenAddress = (addr: string) => {
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
@@ -48,8 +48,13 @@ export function Header() {
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-mainText">
                   Prize<span className="text-primary">Pop</span>
                 </h1>
-                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Botchain Testnet
+                <span className="inline-flex items-center gap-1.5 text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  <img
+                    src="/botchain-logo.png"
+                    alt="BOT Chain"
+                    className="w-3 h-3 rounded object-contain"
+                  />
+                  <span>BOT Chain Mainnet</span>
                 </span>
               </div>
               <p className="text-xs text-mutedText">
@@ -59,13 +64,44 @@ export function Header() {
           </div>
 
           {/* Wallet & Network Info */}
-          <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-end">
+          <div className="flex items-center gap-2.5 flex-wrap justify-center sm:justify-end">
+            <a
+              href="https://botchain.ai"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-background/80 border border-border text-mutedText hover:text-primary hover:border-primary/40 transition-all shadow-sm"
+              title="Official BOT Chain Website"
+            >
+              <img
+                src="/botchain-logo.png"
+                alt="BOT Chain"
+                className="w-3.5 h-3.5 rounded object-contain shrink-0"
+              />
+              <span>botchain.ai</span>
+              <ExternalLink className="w-3 h-3 text-mutedText" />
+            </a>
+
+            <a
+              href="https://scan.botchain.ai"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-background/80 border border-border text-mutedText hover:text-primary hover:border-primary/40 transition-all shadow-sm"
+              title="Open BOT Chain Mainnet Explorer"
+            >
+              <img
+                src="/botchain-logo.png"
+                alt="BOT Chain Explorer"
+                className="w-3.5 h-3.5 rounded object-contain shrink-0"
+              />
+              <span>Explorer</span>
+              <ExternalLink className="w-3 h-3 text-mutedText" />
+            </a>
             {isMounted && isConnected && isWrongNetwork && (
               <button
-                onClick={() => switchChain({ chainId: botchainTestnet.id })}
+                onClick={() => switchChain({ chainId: botchain.id })}
                 disabled={isSwitching}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-error/15 text-error border border-error/30 hover:bg-error/25 transition-all cursor-pointer animate-pulse"
-                title="Click to switch to Botchain Testnet"
+                title="Click to switch to Botchain Mainnet"
               >
                 <AlertTriangle className="w-3.5 h-3.5" />
                 <span>{isSwitching ? "Switching..." : "Switch to Botchain"}</span>

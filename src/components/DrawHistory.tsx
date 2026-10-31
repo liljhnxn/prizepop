@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { History, Trophy, ExternalLink, Copy, Check, Users, Sparkles, CheckCircle2 } from "lucide-react";
-import { botchainTestnet } from "@/lib/chain";
+import { botchain } from "@/lib/chain";
 
 export interface HistoryItem {
   drawId: number;
@@ -160,7 +160,7 @@ export function DrawHistory({
                           )}
                         </button>
                         <a
-                          href={`${botchainTestnet.blockExplorers.default.url}/address/${item.winner}`}
+                          href={`${botchain.blockExplorers.default.url}/address/${item.winner}`}
                           target="_blank"
                           rel="noreferrer"
                           className="text-mutedText hover:text-primary transition-colors p-0.5"

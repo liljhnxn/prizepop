@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Users, Copy, Check, ExternalLink, ShieldCheck } from "lucide-react";
-import { botchainTestnet } from "@/lib/chain";
+import { botchain } from "@/lib/chain";
 
 interface ParticipantListProps {
   participants: readonly `0x${string}`[] | string[];
@@ -124,7 +124,7 @@ export function ParticipantList({
                   </button>
 
                   <a
-                    href={`${botchainTestnet.blockExplorers.default.url}/address/${addr}`}
+                    href={`${botchain.blockExplorers.default.url}/address/${addr}`}
                     target="_blank"
                     rel="noreferrer"
                     className="p-1.5 rounded-lg text-mutedText hover:text-primary hover:bg-card border border-transparent hover:border-border transition-colors"

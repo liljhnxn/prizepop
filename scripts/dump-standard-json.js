@@ -1,11 +1,13 @@
 const fs = require("fs");
 const path = require("path");
 
+const buildInfoDir = path.join(__dirname, "../artifacts/build-info");
+const files = fs.readdirSync(buildInfoDir).filter((f) => f.endsWith(".json"));
+if (files.length === 0) {
+  throw new Error("No build-info file found. Please run npx hardhat compile first.");
+}
 const buildInfo = JSON.parse(
-  fs.readFileSync(
-    path.join(__dirname, "../artifacts/build-info/42062ba638eef82e3e6e62e5001d3992.json"),
-    "utf8"
-  )
+  fs.readFileSync(path.join(buildInfoDir, files[0]), "utf8")
 );
 
 fs.writeFileSync(

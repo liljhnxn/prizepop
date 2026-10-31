@@ -1,8 +1,13 @@
+require("dotenv").config({ path: ".env.local" });
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const contractAddress = "0xFe4998f06642223ad57E9cFA6609415C9d11e9e3";
+  const contractAddress =
+    process.argv[2] ||
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+    "0x38AaD618b663e5E14431965a26d50FC76fb90273";
   const sourceCode = fs.readFileSync(
     path.join(__dirname, "../contracts/PrizePop.sol"),
     "utf8"
@@ -18,22 +23,20 @@ async function main() {
     constructor_args: "",
     evm_version: "paris",
     license_type: "none",
-    file_path: "contracts/PrizePop.sol"
+    file_path: "contracts/PrizePop.sol",
   };
 
-  console.log("Submitting via flattened-code with file_path...");
+  const endpoint = `https://scan.botchain.ai/api/v2/smart-contracts/${contractAddress}/verification/via/flattened-code`;
+  console.log(`Submitting verification to ${endpoint}...`);
 
   try {
-    const res = await fetch(
-      `https://scan.bohr.life/api/v2/smart-contracts/${contractAddress}/verification/via/flattened-code`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
     const text = await res.text();
     console.log("Status:", res.status);

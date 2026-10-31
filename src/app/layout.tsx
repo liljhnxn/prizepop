@@ -3,10 +3,10 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "PrizePop — Simple Web3 Prize Draw dApp",
+  title: "PrizePop — Web3 Prize Draw on BOT Chain Mainnet",
   description:
-    "Enter the decentralized prize draw on Botchain Testnet for free. One draw. Many participants. One winner.",
-  keywords: ["Web3", "Prize Draw", "dApp", "Botchain", "Ethereum", "Smart Contract"],
+    "Enter the decentralized prize draw on BOT Chain Mainnet for free. One draw. Many participants. One winner.",
+  keywords: ["Web3", "Prize Draw", "dApp", "BOT Chain", "Botchain", "Ethereum", "Smart Contract"],
 };
 
 export default function RootLayout({

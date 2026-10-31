@@ -1,8 +1,13 @@
+require("dotenv").config({ path: ".env.local" });
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const contractAddress = "0xFe4998f06642223ad57E9cFA6609415C9d11e9e3";
+  const contractAddress =
+    process.argv[2] ||
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+    "0x38AaD618b663e5E14431965a26d50FC76fb90273";
   const sourceCode = fs.readFileSync(
     path.join(__dirname, "../contracts/PrizePop.sol"),
     "utf8"
@@ -23,10 +28,11 @@ async function main() {
     licenseType: "3",
   });
 
-  console.log("Submitting verification to https://scan.bohr.life/api ...");
+  const apiEndpoint = process.env.BOTCHAIN_EXPLORER_API || "https://scan.botchain.ai/api";
+  console.log(`Submitting verification for ${contractAddress} to ${apiEndpoint} ...`);
 
   try {
-    const res = await fetch("https://scan.bohr.life/api", {
+    const res = await fetch(apiEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

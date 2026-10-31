@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useConnect, useChainId, useSwitchChain, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { botchainTestnet } from "@/lib/chain";
+import { botchain } from "@/lib/chain";
 import { prizePopAbi } from "@/lib/abi";
 import { Sparkles, Users, CheckCircle2, Loader2, AlertCircle, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -31,7 +31,7 @@ export function DrawCard({
   const { connect, connectors } = useConnect();
   const { switchChain } = useSwitchChain();
 
-  const isWrongNetwork = isConnected && chainId !== botchainTestnet.id;
+  const isWrongNetwork = isConnected && chainId !== botchain.id;
   const isDrawOpen = drawStatus === 0;
   const isDrawClosed = drawStatus === 1;
   const isDrawCompleted = drawStatus === 2;
@@ -76,7 +76,7 @@ export function DrawCard({
         msg.toLowerCase().includes("exceed")
       ) {
         msg =
-          "Insufficient BOT balance in active wallet for gas fees. Please switch to an account with testnet BOT or get testnet BOT from the faucet.";
+          "Insufficient BOT balance in active wallet for gas fees. Please ensure your wallet has BOT on BOT Chain Mainnet.";
       } else if (msg.length > 160) {
         msg = msg.slice(0, 160) + "...";
       }
@@ -155,7 +155,7 @@ export function DrawCard({
             {getStatusBadge()}
           </div>
           <p className="text-sm text-mutedText max-w-xl">
-            Free entry on Botchain Testnet. Enter Draw #{currentDrawId} with a single on-chain transaction. Past participants are eligible to enter every new round!
+            Free entry on BOT Chain Mainnet. Enter Draw #{currentDrawId} with a single on-chain transaction. Past participants are eligible to enter every new round!
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-4 sm:gap-6">
@@ -189,11 +189,11 @@ export function DrawCard({
             </button>
           ) : isWrongNetwork ? (
             <button
-              onClick={() => switchChain({ chainId: botchainTestnet.id })}
+              onClick={() => switchChain({ chainId: botchain.id })}
               className="w-full sm:w-auto px-6 py-3.5 rounded-xl text-base font-bold bg-error/20 text-error border border-error/40 hover:bg-error/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <AlertCircle className="w-5 h-5" />
-              <span>Switch to Botchain Testnet</span>
+              <span>Switch to Botchain</span>
             </button>
           ) : hasUserEntered ? (
             <div className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-success/20 text-success border border-success/40 font-bold flex items-center justify-center gap-2 shadow-sm">
@@ -249,7 +249,7 @@ export function DrawCard({
             <div className="text-xs text-mutedText flex items-center gap-1.5 mt-1">
               <span>Tx:</span>
               <a
-                href={`${botchainTestnet.blockExplorers.default.url}/tx/${hash}`}
+                href={`${botchain.blockExplorers.default.url}/tx/${hash}`}
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary hover:underline flex items-center gap-1 font-mono"

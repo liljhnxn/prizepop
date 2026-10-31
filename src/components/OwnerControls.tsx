@@ -2,7 +2,7 @@
 
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { prizePopAbi } from "@/lib/abi";
-import { botchainTestnet } from "@/lib/chain";
+import { botchain } from "@/lib/chain";
 import { Shield, Lock, Trophy, PlusCircle, Loader2, AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -298,7 +298,7 @@ export function OwnerControls({
         <div className="mt-4 flex items-center gap-2 text-xs text-mutedText bg-background/90 p-2.5 rounded-lg border border-border">
           <span>Transaction:</span>
           <a
-            href={`${botchainTestnet.blockExplorers.default.url}/tx/${hash}`}
+            href={`${botchain.blockExplorers.default.url}/tx/${hash}`}
             target="_blank"
             rel="noreferrer"
             className="text-primary hover:underline flex items-center gap-1 font-mono"

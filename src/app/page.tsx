@@ -9,20 +9,16 @@ import { WinnerSection } from "@/components/WinnerSection";
 import { OwnerControls } from "@/components/OwnerControls";
 import { DrawHistory, HistoryItem } from "@/components/DrawHistory";
 import { Footer } from "@/components/Footer";
-import { AlertCircle, Terminal, RefreshCw, Trophy, Layers } from "lucide-react";
+import { AlertCircle, Terminal, RefreshCw, Trophy, Layers, ExternalLink } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 
-const MULTI_ROUND_CONTRACT_ADDRESS: `0x${string}` =
-  "0x48ef5c6348e349A9694579Fb1f2f8828f3a3f929";
-const OLD_V1_CONTRACT_ADDRESS =
-  "0xfe4998f06642223ad57e9cfa6609415c9d11e9e3";
+const DEFAULT_MAINNET_CONTRACT_ADDRESS: `0x${string}` =
+  "0x38AaD618b663e5E14431965a26d50FC76fb90273";
 
 export default function Home() {
   const envAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
   const contractAddress: `0x${string}` =
-    envAddress && envAddress.toLowerCase() !== OLD_V1_CONTRACT_ADDRESS
-      ? (envAddress as `0x${string}`)
-      : MULTI_ROUND_CONTRACT_ADDRESS;
+    (envAddress as `0x${string}`) || DEFAULT_MAINNET_CONTRACT_ADDRESS;
 
   const { address } = useAccount();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -161,7 +157,7 @@ export default function Home() {
                   Contract Address Not Configured
                 </h3>
                 <p className="text-sm text-mutedText mb-4 leading-relaxed">
-                  To interact with the smart contract on Botchain Testnet, deploy the contract and configure your{" "}
+                  To interact with the smart contract on Botchain Mainnet, deploy the contract and configure your{" "}
                   <code className="text-primary font-mono bg-background px-1.5 py-0.5 rounded text-xs">
                     NEXT_PUBLIC_CONTRACT_ADDRESS
                   </code>{" "}
@@ -175,10 +171,10 @@ export default function Home() {
                   </div>
                   <div className="text-mutedText"># 1. Run tests</div>
                   <div className="text-secondary">npx hardhat test</div>
-                  <div className="text-mutedText mt-2"># 2. Deploy to Botchain Testnet</div>
-                  <div className="text-secondary">npx hardhat run scripts/deploy.js --network botchainTestnet</div>
+                  <div className="text-mutedText mt-2"># 2. Deploy to Botchain Mainnet</div>
+                  <div className="text-secondary">npm run deploy:mainnet</div>
                   <div className="text-mutedText mt-2"># 3. Add to .env.local</div>
-                  <div className="text-primary">NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourDeployedAddress</div>
+                  <div className="text-primary">NEXT_PUBLIC_CONTRACT_ADDRESS=0x38AaD618b663e5E14431965a26d50FC76fb90273</div>
                 </div>
               </div>
             </div>
@@ -187,17 +183,41 @@ export default function Home() {
 
         {/* Top Control Bar with Draw Badge & Quick Refresh */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 text-xs text-mutedText font-mono">
               <span>Contract:</span>
               {contractAddress ? (
-                <span className="text-primary font-medium">
-                  {contractAddress.slice(0, 8)}...{contractAddress.slice(-6)}
-                </span>
+                <a
+                  href={`https://scan.botchain.ai/address/${contractAddress}#code`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-1"
+                  title="View verified contract on BOT Chain Explorer"
+                >
+                  <span>
+                    {contractAddress.slice(0, 8)}...{contractAddress.slice(-6)}
+                  </span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               ) : (
                 <span className="text-error">Not Configured</span>
               )}
             </div>
+
+            <a
+              href="https://scan.botchain.ai"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-secondary/10 text-secondary border border-secondary/30 hover:bg-secondary/20 transition-colors"
+            >
+              <img
+                src="/botchain-logo.png"
+                alt="BOT Chain"
+                className="w-3 h-3 rounded object-contain shrink-0"
+              />
+              <span>BOT Chain Explorer</span>
+              <ExternalLink className="w-2.5 h-2.5" />
+            </a>
 
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/20">
               <Layers className="w-3 h-3" />

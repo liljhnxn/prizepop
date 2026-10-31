@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Trophy, Copy, Check, ExternalLink, AlertTriangle, Sparkles, Award } from "lucide-react";
-import { botchainTestnet } from "@/lib/chain";
+import { botchain } from "@/lib/chain";
 
 interface WinnerSectionProps {
   currentDrawId: number;
@@ -168,7 +168,7 @@ export function WinnerSection({
                 </button>
 
                 <a
-                  href={`${botchainTestnet.blockExplorers.default.url}/address/${displayedWinner}`}
+                  href={`${botchain.blockExplorers.default.url}/address/${displayedWinner}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors"
@@ -200,7 +200,7 @@ export function WinnerSection({
               <AlertTriangle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div>
                 <span className="font-semibold text-mainText">Demo Randomness Notice: </span>
-                This winner was selected using a demo-only on-chain pseudo-random mechanism for Botchain testnet illustration. It is not cryptographically verifiable or tamper-resistant.
+                This winner was selected using an on-chain pseudo-random mechanism for BOT Chain illustration. It is not cryptographically verifiable or tamper-resistant.
               </div>
             </div>
           </div>
